@@ -19,6 +19,7 @@ mixer.music.load(tone)
 mixer.music.set_volume(0.7)
 
 def play_alarm():
+    play_count = 0
     hours = int(input("Enter the hours: "))
     minutes = int(input("Enter the minutes: "))
     alarm_time = datetime.datetime.now().replace(hour=hours, minute=minutes, second=0, microsecond=0)
@@ -31,23 +32,34 @@ def play_alarm():
         
         if current_time >= alarm_time:
             # Check if the current time is greater than or equal to the alarm time
-            mixer.music.play()
-            print("Wake up!")  # Print "Wake up!" to the console
+            if play_count < 2:
+                mixer.music.play()
+                print("Wake up!")  # Print "Wake up!" to the console
+                play_count += 1
 
-            time.sleep(10)  # Wait for 10 seconds
+                while mixer.music.get_busy():
+                    time.sleep(1)  # Wait for the music to finish playing
 
-            print("Press 's' to snooze after 1 minute")
-            print("Press 'e' to exit the program")
-            query = input(" ")
+                if play_count < 2:
+                    print("Alarm will play again after 1 minute") 
+                    alarm_time = alarm_time + datetime.timedelta(minutes=1)
+                else:
+                    print("Alarm has played twice...Exiting")
+                    break
+                # time.sleep(10)  # Wait for 10 seconds
+                print("Press 's' to snooze after 1 minute")
+                print("Press 'e' to exit the program")
+                query = input(" ")
 
-            if query == 's':
-                mixer.music.stop()
-                alarm_time = alarm_time + datetime.timedelta(minutes=1)
-                print("Snoozed after 1 minute of set timer")
-            elif query == 'e':
-                mixer.music.stop()
+                if query == 's':
+                    mixer.music.stop()
+                    alarm_time = alarm_time + datetime.timedelta(minutes=1)
+                    print("Snoozed after 1 minute of set timer")
+                elif query == 'e':
+                    mixer.music.stop()
+                    break
+            else:
                 break
-        
         else:
             time.sleep(1)  # Wait for 1 second before checking the time again
 
